@@ -1,7 +1,5 @@
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
-
-from data import quotes
 from keyboards.inline.callback_datas import book_callback
 
 pagination = InlineKeyboardMarkup()
