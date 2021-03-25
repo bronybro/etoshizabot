@@ -101,7 +101,7 @@ async def bot_read(message: Message):
     quotes.cur.execute(f'SELECT user_page FROM users WHERE user_id = "{message.from_user.id}"')
     x = list(quotes.cur.fetchone())
     quote = x[0]
-    await Comment.cs.set()
+    #await Comment.cs.set()
     await message.answer(text=lst[quote], reply_markup=pagination)
 
 
