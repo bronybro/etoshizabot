@@ -15,7 +15,7 @@ async def bot_help(message: types.Message):
     x = quotes.cur.execute(f'SELECT * FROM users WHERE user_id = "{message.from_user.id}"')
     print(x)
     try:
-        quotes.cur.execute(f'INSERT INTO users VALUES("{message.from_user.id}", "0", "0")')
+        quotes.cur.execute(f'INSERT INTO users VALUES("{message.from_user.id}", "0", "0","")')
         quotes.conn.commit()
     except sqlite3.IntegrityError:
         await message.answer("Welcome back!")

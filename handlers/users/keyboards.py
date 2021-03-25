@@ -79,16 +79,21 @@ async def vote_5(call: CallbackQuery):
                                  reply_markup=feedcomment)
 
 
-#@dp.callback_query_handler(state='*')
+'''Устанавливаем состояние'''
 @dp.callback_query_handler(about_callback.filter(feedback="add_comment"))
 async def feed_comment(call: CallbackQuery):
-    #await Comment.cs.set()
+    await Comment.cs.set()
     await call.message.edit_text(text="Type you comment..",
                                  reply_markup='')
 
-
-#@dp.message_handler(state='*')
-#async def waiting_review(message: Message, state: FSMContext):
+'''сохраняем комментарий и выходим из состояния'''
+@dp.message_handler(state=Comment.cs)
+async def waiting_review(message: Message, state: FSMContext):
+    print(message.text)
+    quotes.cur.execute(f'UPDATE users SET user_comment = "{message.text}" WHERE user_id = "{message.from_user.id}"')
+    quotes.conn.commit()
+    await state.finish()
+    await message.answer(text='Thank yor for vote and review!')
 
 
 @dp.message_handler(Command("read"))
