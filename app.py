@@ -9,6 +9,10 @@ import handlers
 #     # Уведомляет про запуск
 #     await on_startup_notify(dispatcher)
 
+async def shutdown(dispatcher: dp): # Закрываем соединение с машиной состояний
+    await dispatcher.storage.close()
+    await dispatcher.storage.wait_closed()
+
 
 if __name__ == '__main__':
-    executor.start_polling(dp)  # , on_startup=on_startup)
+    executor.start_polling(dp, on_shutdown=shutdown)

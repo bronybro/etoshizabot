@@ -14,4 +14,4 @@ lst = [
 #conn = sqlite3.connect('имя_базы_данных.расширение(.db,.sqlite3)')
 conn = sqlite3.connect('data.db')
 cur = conn.cursor()
-cur.execute('CREATE TABLE IF NOT EXISTS users(user_id INTEGER UNIQUE, user_page INTEGER)')
+cur.execute('CREATE TABLE IF NOT EXISTS users(user_id INTEGER UNIQUE, user_page INTEGER, user_vote INTEGER DEFAULT 0)')

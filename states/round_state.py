@@ -2,5 +2,5 @@ from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
 
 
-class Round(StatesGroup):
-    qpage: State = State()
+class Comment(StatesGroup):
+    cs: State = State()
