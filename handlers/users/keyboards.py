@@ -1,16 +1,14 @@
 import logging
-import sqlite3
+import typing
 
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters import Command
-from aiogram.types import Message, CallbackQuery, ParseMode
+from aiogram.types import Message, CallbackQuery
 
 from data import quotes
 from data.quotes import lst
-from keyboards.inline import vote_keys
 from keyboards.inline.about_keys import contact_buttons
 from keyboards.inline.book_keys import pagination
-# from data.quotes import quote, lst
 from keyboards.inline.callback_datas import book_callback, about_callback
 from keyboards.inline.vote_keys import feedscores, feedcomment
 from loader import dp
@@ -95,44 +93,36 @@ async def waiting_review(message: Message, state: FSMContext):
     await state.finish()
     await message.answer(text='Thank yor for vote and review!')
 
-
+#вынести в отдельный модуль
 @dp.message_handler(Command("read"))
 async def bot_read(message: Message):
     quotes.cur.execute(f'SELECT user_page FROM users WHERE user_id = "{message.from_user.id}"')
     x = list(quotes.cur.fetchone())
     quote = x[0]
-    #await Comment.cs.set()
+
     await message.answer(text=lst[quote], reply_markup=pagination)
 
 
-@dp.callback_query_handler(book_callback.filter(page="prev"))
-# @dp.message_handler()
-async def prev_page(call: CallbackQuery):
+@dp.callback_query_handler(book_callback.filter(page=['next','prev']))
+async def prev_page(call: CallbackQuery, callback_data: typing.Dict[str, str]):
     await call.answer(cache_time=2)
+    callback_data_action = callback_data['page']
+    print(callback_data_action)
     quotes.cur.execute(f'SELECT user_page FROM users WHERE user_id = "{call.from_user.id}"')
     x = list(quotes.cur.fetchone())
     quote = x[0]
-    if quote != 0:
-        quote -= 1
-    elif quote < 1:
-        quote = len(lst) - 1
-    logging.info(f" quote number={quote}|{lst[quote]}")
-    quotes.cur.execute(f'UPDATE users SET user_page = "{quote}" WHERE user_id = "{call.from_user.id}"')
-    quotes.conn.commit()
-    await call.message.edit_text(text=lst[quote],
-                                 reply_markup=pagination)
 
+    if callback_data_action == 'next':
+        if quote != len(lst) - 1:
+            quote += 1
+        elif quote >= len(lst) - 1:
+            quote = 0
+    else:
+        if quote != 0:
+            quote -= 1
+        elif quote < 1:
+            quote = len(lst) - 1
 
-@dp.callback_query_handler(book_callback.filter(page="next"))
-async def next_page(call: CallbackQuery):
-    await call.answer(cache_time=2)
-    quotes.cur.execute(f'SELECT user_page FROM users WHERE user_id = "{call.from_user.id}"')
-    x = list(quotes.cur.fetchone())
-    quote = x[0]
-    if quote != len(lst) - 1:
-        quote += 1
-    elif quote >= len(lst) - 1:
-        quote = 0
     logging.info(f" quote number={quote}|{lst[quote]}")
     quotes.cur.execute(f'UPDATE users SET user_page = "{quote}" WHERE user_id = "{call.from_user.id}"')
     quotes.conn.commit()
