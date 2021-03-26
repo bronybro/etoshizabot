@@ -1,5 +1,6 @@
 from .help import dp
 from .start import dp
-from .keyboards import dp
+from .about import dp
+from .read import dp
 
 __all__ = ["dp"]

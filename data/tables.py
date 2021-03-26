@@ -17,7 +17,6 @@ cur = conn.cursor()
 cur.execute(
     'CREATE TABLE IF NOT EXISTS users(\
 user_id INTEGER UNIQUE,\
-user_page INTEGER,\
 user_vote INTEGER,\
 user_comment TEXT)'
 )  # Добавить comment_data
