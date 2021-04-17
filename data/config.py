@@ -9,4 +9,5 @@ ADMINS = env.list("ADMINS")  # Тут у нас будет список из а�
 IP = env.str("ip")  # Тоже str, но для айпи адреса хоста
 URL_TWITTER = env.str("URL_TWITTER")
 URL_TELEGRAM = env.str("URL_TELEGRAM")
+LIST_EMOJI = env.int("list_emoji_length")
 

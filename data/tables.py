@@ -18,5 +18,6 @@ cur.execute(
     'CREATE TABLE IF NOT EXISTS users(\
 user_id INTEGER UNIQUE,\
 user_vote INTEGER,\
-user_comment TEXT)'
+user_comment TEXT,\
+emoji_flag BOOL)'
 )  # Добавить comment_data
