@@ -1,7 +1,10 @@
-from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
 
 
 class Comment(StatesGroup):
-    cs: State = State()
+    pages: State = State()
     vote: State = State()
+
+class Stock(StatesGroup):
+    flag: State = State()
+    buy: State = State()

@@ -1,0 +1,20 @@
+{
+"help":[
+  "Список команд:",
+  "/start - Начать диалог",
+  "/help - Получить справку по командам",
+  "/about - Связь с администрацией",
+  "/show - Витрина",
+  "/stock - coming soon"
+],
+  "about": ["about this bot",
+    "This bot use <b>aiogram</b>",
+    "Some links:"
+  ],
+  "stock": ["store management",
+    "/list - list of goods",
+    "/add - add product",
+    "/edit - edit position",
+    "/del - delete position"
+  ]
+}

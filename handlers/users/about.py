@@ -5,6 +5,7 @@ from aiogram.dispatcher.filters import Command
 from aiogram.types import Message, CallbackQuery
 
 from data import tables
+from data.config import config_text
 from keyboards.inline.about_keys import contact_buttons
 from keyboards.inline.callback_datas import about_callback
 from keyboards.inline.vote_keys import feedscores, feedcomment
@@ -12,10 +13,11 @@ from loader import dp
 from states.states import Comment
 
 
-@dp.message_handler(Command("about"),state='*')
+@dp.message_handler(Command("about"))
 async def bot_about(message: Message):
-    await message.answer(text=f'about this bot\nThis bot use <b>aiogram</b>\
-\n You <code>user_id="{message.from_user.id}"</code>',
+    json=config_text()
+    text=json["about"]
+    await message.answer(text="\n".join(text),
                          reply_markup=contact_buttons)
 
 

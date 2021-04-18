@@ -11,7 +11,7 @@ async def bot_help(message: types.Message):
     text = f"Welcome, {message.from_user.first_name}!  Please, choise language to use"
 
     try:
-        tables.cur.execute(f'INSERT INTO users VALUES("{message.from_user.id}","0","","0")')
+        tables.cur.execute(f'INSERT INTO users VALUES("{message.from_user.id}","0","")')
         tables.conn.commit()
     except sqlite3.IntegrityError:
         await message.answer("Welcome back!")
