@@ -1,17 +1,15 @@
 import logging
 import typing
 
-from aiogram.utils.exceptions import MessageNotModified
-
-from loader import dp
 from aiogram.dispatcher import FSMContext
-from states.states import Comment, Stock
 from aiogram.dispatcher.filters import Command
 from aiogram.types import Message, CallbackQuery
 
 from data.tables import lst
-from keyboards.inline.show_keys import pagination
 from keyboards.inline.callback_datas import show_callback
+from keyboards.inline.show_keys import pagination
+from loader import dp
+from states.states import Comment
 
 
 @dp.message_handler(Command("show"))

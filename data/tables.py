@@ -22,10 +22,10 @@ user_comment TEXT)'
 )
 cur.execute(
     'CREATE TABLE IF NOT EXISTS products(\
-product_id INTEGER UNIQUE,\
+product_name TEXT,\
 product_description TEXT,\
-user_vote INTEGER,\
-price REAL)'
+price REAL,\
+photo INTEGER)'
 )
 
 

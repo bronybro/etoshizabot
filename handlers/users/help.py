@@ -8,4 +8,5 @@ from loader import dp
 async def bot_help(message: types.Message):
     json = config_text()
     text = json['help']
+    # TODO add admin comands and check
     await message.answer("\n".join(text))

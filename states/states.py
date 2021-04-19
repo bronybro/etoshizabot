@@ -6,5 +6,10 @@ class Comment(StatesGroup):
     vote: State = State()
 
 class Stock(StatesGroup):
-    flag: State = State()
+    stock: State = State()
+    name: State = State()
+    description: State = State()
+    price: State = State()
+    photo: State = State()
+    submit: State = State()
     buy: State = State()
