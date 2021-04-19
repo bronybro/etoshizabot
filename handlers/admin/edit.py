@@ -7,7 +7,7 @@ from aiogram.types import CallbackQuery, Message, ContentType
 from data import tables
 from keyboards.inline.callback_datas import stock_callback, edit_callback
 from keyboards.inline.edit_keys import edit_markup
-from loader import dp
+from loader import dp, bot
 from states.states import Stock, Edit
 
 
@@ -44,7 +44,7 @@ async def choice_edit(message: Message, state: FSMContext):
 
 
 @dp.callback_query_handler(edit_callback.filter(
-    edit=['name', 'description', 'price', 'cancel']),
+    edit=['name', 'description', 'price', 'photo','cancel']),
     state=Edit.Q2)
 async def edit_item(call: CallbackQuery, callback_data: typing.Dict[str, str], state: FSMContext):
     await call.answer(cache_time=2)
@@ -53,12 +53,26 @@ async def edit_item(call: CallbackQuery, callback_data: typing.Dict[str, str], s
     if callback_data_action == 'cancel':
         await Stock.stock.set()
         await call.message.answer(text='canceled')
+    elif callback_data_action == 'photo':
+        await Edit.Q3.set()
     else:
-        await call.message.answer(text=f'Send me new {callback_data_action}')
-        await Edit.next()
+        await Edit.Q4.set()
+    await call.message.answer(text=f'Send me new {callback_data_action}')
 
 
-@dp.message_handler(state=Edit.Q3)
+@dp.message_handler(state=Edit.Q3,content_types=types.ContentType.PHOTO)
+async def edit_photo(message: Message, state: FSMContext):
+    photo= message.photo[-1].file_id
+    await state.update_data(photo=photo)
+    data = await state.get_data()
+    print(data["photo"])
+    print( ' Ok')
+    tables.cur.execute(f'UPDATE products SET photo="{data["photo"]}" WHERE item_id="{data["id"]}"')
+    tables.conn.commit()
+    await message.answer('Success!')
+
+
+@dp.message_handler(state=Edit.Q4)
 async def edit_text(message: Message, state: FSMContext):
     data = await state.get_data()
     if data['action'] == 'name':
@@ -69,29 +83,9 @@ async def edit_text(message: Message, state: FSMContext):
         if message.text.isdigit():
             tables.cur.execute(f'UPDATE products SET price="{message.text}" WHERE item_id="{data["id"]}"')
             await message.answer('Success!')
-            await state.finish()
         else:
-            await message.reply('Must be an integer')
+            await message.reply('Must be an integer') #todo проверка на integer вынести отдельно
     tables.conn.commit()
-    # await state.finish()
+    await message.answer('Success!')
 
 
-#
-@dp.callback_query_handler(edit_callback.filter(edit=['photo']), state=Edit.Q2)  # todo context types
-async def edit_photo(call: CallbackQuery, state: FSMContext):
-    data = await state.get_data()
-    tables.cur.execute(f'UPDATE products SET photo="{call.message.photo[-1].file_id}" WHERE item_id="{data["id"]}"')
-    await call.message.answer('dsfsdf')
-    await Edit.Q5.set()
-
-    data = await state.get_data()
-    tables.cur.execute(f'UPDATE products SET photo="{call.message.photo[-1].file_id}" WHERE item_id="{data["id"]}"')
-    #await Edit.next()
-    # else:
-    #     await call.message.answer('Send me a photo!')
-#
-
-# @dp.message_handler(state=Edit.Q4)
-# async def edit_final(message:Message,state:FSMContext):
-#     await message.answer('Success!')
-#     await state.finish()
