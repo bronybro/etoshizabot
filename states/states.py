@@ -7,9 +7,15 @@ class Comment(StatesGroup):
 
 class Stock(StatesGroup):
     stock: State = State()
-    name: State = State()
-    description: State = State()
-    price: State = State()
-    photo: State = State()
-    submit: State = State()
+    Q1: State = State()
+    Q2: State = State()
+    Q3: State = State()
+    Q4: State = State()
+    Q5: State = State()
     buy: State = State()
+
+class Edit(StatesGroup):
+    Q1: State = State()
+    Q2: State = State()
+    Q3: State = State()
+    Q4: State = State()

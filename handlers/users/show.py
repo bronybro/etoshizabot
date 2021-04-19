@@ -12,7 +12,7 @@ from loader import dp
 from states.states import Comment
 
 
-@dp.message_handler(Command("show"))
+@dp.message_handler(Command("show"),state='*')
 async def bot_read(message: Message, state: FSMContext):
     await state.finish()
     quote = 0
