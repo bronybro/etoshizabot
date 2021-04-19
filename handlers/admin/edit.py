@@ -2,12 +2,12 @@ import typing
 
 from aiogram import types
 from aiogram.dispatcher import FSMContext
-from aiogram.types import CallbackQuery, Message, ContentType
+from aiogram.types import CallbackQuery, Message
 
 from data import tables
 from keyboards.inline.callback_datas import stock_callback, edit_callback
 from keyboards.inline.edit_keys import edit_markup
-from loader import dp, bot
+from loader import dp
 from states.states import Stock, Edit
 
 
@@ -55,9 +55,12 @@ async def edit_item(call: CallbackQuery, callback_data: typing.Dict[str, str], s
         await call.message.answer(text='canceled')
     elif callback_data_action == 'photo':
         await Edit.Q3.set()
-    else:
+    elif callback_data_action == 'price':
         await Edit.Q4.set()
-    await call.message.answer(text=f'Send me new {callback_data_action}')
+    else:
+        await Edit.Q5.set()
+    if callback_data_action != 'cancel':
+        await call.message.answer(text=f'Send me new {callback_data_action}')
 
 
 @dp.message_handler(state=Edit.Q3,content_types=types.ContentType.PHOTO)
@@ -70,22 +73,30 @@ async def edit_photo(message: Message, state: FSMContext):
     tables.cur.execute(f'UPDATE products SET photo="{data["photo"]}" WHERE item_id="{data["id"]}"')
     tables.conn.commit()
     await message.answer('Success!')
+    await state.finish()
 
 
 @dp.message_handler(state=Edit.Q4)
+async def edit_price(message: Message, state: FSMContext):
+    data = await state.get_data()
+    if data['action'] == 'price':
+        if message.text.isdigit():
+            tables.cur.execute(f'UPDATE products SET price="{message.text}" WHERE item_id="{data["id"]}"')
+            await message.answer('Success!')
+        else:
+            await message.reply('Must be an integer')
+    tables.conn.commit()
+    await state.finish()
+
+
+@dp.message_handler(state=Edit.Q5)
 async def edit_text(message: Message, state: FSMContext):
     data = await state.get_data()
     if data['action'] == 'name':
         tables.cur.execute(f'UPDATE products SET product_name="{message.text}" WHERE item_id="{data["id"]}"')
     elif data['action'] == 'description':
         tables.cur.execute(f'UPDATE products SET product_description="{message.text}" WHERE item_id="{data["id"]}"')
-    elif data['action'] == 'price':
-        if message.text.isdigit():
-            tables.cur.execute(f'UPDATE products SET price="{message.text}" WHERE item_id="{data["id"]}"')
-            await message.answer('Success!')
-        else:
-            await message.reply('Must be an integer') #todo проверка на integer вынести отдельно
     tables.conn.commit()
     await message.answer('Success!')
-
+    await state.finish()
 

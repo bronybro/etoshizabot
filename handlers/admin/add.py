@@ -43,7 +43,6 @@ async def product_price(message: Message, state: FSMContext):
     await state.update_data(price=message.text)
     await message.answer(text='Send me the photo of product')
     await Stock.next()
-    # await stock.get_list(message)
 
 
 @dp.message_handler(state=Stock.Q4, content_types=types.ContentType.PHOTO)
