@@ -5,6 +5,7 @@ from aiogram.dispatcher import FSMContext
 from aiogram.types import CallbackQuery, Message
 
 from data import tables
+from handlers.admin import stock
 from keyboards.inline.callback_datas import stock_callback, edit_callback
 from keyboards.inline.edit_keys import edit_markup
 from loader import dp
@@ -12,7 +13,7 @@ from states.states import Stock, Edit
 
 
 @dp.callback_query_handler(stock_callback.filter(action=['edit']), state=Stock.stock)
-async def add_product(call: CallbackQuery, state: FSMContext):
+async def edit_product(call: CallbackQuery, state: FSMContext):
     await state.reset_state()
     await call.answer(cache_time=2)
     await call.message.answer(text='Send me number of product')
@@ -23,7 +24,7 @@ async def add_product(call: CallbackQuery, state: FSMContext):
 async def is_digit_invalid(message: Message):
     await message.answer('Message text must be a number!')
 
-
+# fixme WTF?
 @dp.message_handler(state=Edit.Q1)
 async def choice_edit(message: Message, state: FSMContext):
     i = int(message.text) - 1
@@ -31,7 +32,7 @@ async def choice_edit(message: Message, state: FSMContext):
     list = tables.cur.fetchall()
     try:
         text = '<b>#{id} {name}</b>\n{description}\n Price: <b>{price}</b>\n \n Choice what you want edit'.format(
-            id=message.text,
+            id=[i][0],
             name=list[i][1],
             description=list[i][2],
             price=str(list[i][3])
@@ -52,7 +53,8 @@ async def edit_item(call: CallbackQuery, callback_data: typing.Dict[str, str], s
     await state.update_data(action=callback_data_action)
     if callback_data_action == 'cancel':
         await Stock.stock.set()
-        await call.message.answer(text='canceled')
+        await stock.get_list(call.message)
+        #await call.message.answer(text='canceled')
     elif callback_data_action == 'photo':
         await Edit.Q3.set()
     elif callback_data_action == 'price':
@@ -72,8 +74,9 @@ async def edit_photo(message: Message, state: FSMContext):
     print( ' Ok')
     tables.cur.execute(f'UPDATE products SET photo="{data["photo"]}" WHERE item_id="{data["id"]}"')
     tables.conn.commit()
-    await message.answer('Success!')
-    await state.finish()
+    #await message.answer('Success!')
+    #await state.finish()
+    await stock.get_list(message)
 
 
 @dp.message_handler(state=Edit.Q4)
@@ -82,11 +85,12 @@ async def edit_price(message: Message, state: FSMContext):
     if data['action'] == 'price':
         if message.text.isdigit():
             tables.cur.execute(f'UPDATE products SET price="{message.text}" WHERE item_id="{data["id"]}"')
-            await message.answer('Success!')
+            #await message.answer('Success!')#todo сделать alert
+            await stock.get_list(message)
         else:
             await message.reply('Must be an integer')
     tables.conn.commit()
-    await state.finish()
+    #await state.finish()
 
 
 @dp.message_handler(state=Edit.Q5)
@@ -97,6 +101,6 @@ async def edit_text(message: Message, state: FSMContext):
     elif data['action'] == 'description':
         tables.cur.execute(f'UPDATE products SET product_description="{message.text}" WHERE item_id="{data["id"]}"')
     tables.conn.commit()
-    await message.answer('Success!')
-    await state.finish()
+    await stock.get_list(message)
+    #await state.finish()
 

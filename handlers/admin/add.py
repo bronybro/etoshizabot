@@ -68,23 +68,22 @@ async def submit_product(call: CallbackQuery, state: FSMContext):
     data = await state.get_data()
     tables.cur.execute(f'SELECT * FROM products')
     list = tables.cur.fetchall()
-    print(data)
-    print(data["name"])
-    print(data["description"])
-    print(type(data["description"]))
-    item_id = len(list)+1
-    print("id= ",item_id)
+    last = max(list)
+    print('test ', last[0])
+    item_id = last[0]+1
+
+    print('max=', item_id )
     tables.cur.execute(
-        f'INSERT INTO products VALUES("{item_id}","{data["name"]}","{data["description"]}","{data["price"]}","{data["photo"]}")')
+        f'INSERT INTO products VALUES({item_id},(?),(?),"{data["price"]}","{data["photo"]}")', (data["name"], data["description"],))
     tables.conn.commit()
-    await call.message.answer(text='The product list has been updated')
+    #await call.message.answer(text='The product list has been updated') # todo alert
     await state.reset_state()
+    await stock.get_list(call.message)
+
 
 
 @dp.callback_query_handler(submit_callback.filter(decision=['cancel']),state=Stock.Q5)
 async def reset_product(call: CallbackQuery, state: FSMContext):
     await call.answer(cache_time=2)
     await state.reset_state()
-    #await stock.get_list()
-
-    # TODO добавить фильтр на ковычки/форматирование
+    await stock.get_list(call.message)

@@ -20,3 +20,7 @@ class Edit(StatesGroup):
     Q3: State = State()
     Q4: State = State()
     Q5: State = State()
+
+class Delete(StatesGroup):
+    Q1: State=State()
+    #Q2: State=State()
