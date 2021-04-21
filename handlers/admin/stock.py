@@ -13,7 +13,7 @@ from states.states import Stock
 @dp.message_handler(Command("stock"), state='*')
 async def get_list(message: Message):
     # json = config_text()
-    await Stock.stock.set() #починить
+    await Stock.stock.set()
     tables.cur.execute(f'SELECT * FROM products')
     list = tables.cur.fetchall()
     print(list)
@@ -27,7 +27,7 @@ async def get_list(message: Message):
         await message.answer(text=text, reply_markup=stock)
     except MessageTextIsEmpty:
         await message.answer(text='The stock is empty', reply_markup=stock)
-    #await Stock.stock.set() # fixme починить колбеки когда возвращает после add и edit
+    #await Stock.stock.set()
 
 
 

@@ -1,14 +1,15 @@
 import typing
 
+
 from aiogram import types
 from aiogram.dispatcher import FSMContext
+from aiogram.dispatcher.webhook import AnswerCallbackQuery
 from aiogram.types import CallbackQuery, Message
-
 from data import tables
 from handlers.admin import stock
 from keyboards.inline.callback_datas import stock_callback, edit_callback
 from keyboards.inline.edit_keys import edit_markup
-from loader import dp
+from loader import dp, bot
 from states.states import Stock, Edit
 
 
@@ -24,23 +25,24 @@ async def edit_product(call: CallbackQuery, state: FSMContext):
 async def is_digit_invalid(message: Message):
     await message.answer('Message text must be a number!')
 
-# fixme WTF?
+
 @dp.message_handler(state=Edit.Q1)
 async def choice_edit(message: Message, state: FSMContext):
-    i = int(message.text) - 1
-    tables.cur.execute(f'SELECT * FROM products')
+    user_input = int(message.text)
+    tables.cur.execute(f'SELECT * FROM products WHERE item_id="{user_input}"') # fixme sql запросом
     list = tables.cur.fetchall()
+    print(list)
     try:
         text = '<b>#{id} {name}</b>\n{description}\n Price: <b>{price}</b>\n \n Choice what you want edit'.format(
-            id=[i][0],
-            name=list[i][1],
-            description=list[i][2],
-            price=str(list[i][3])
+            id=user_input,
+            name=list[0][1],
+            description=list[0][2],
+            price=str(list[0][3])
         )
     except IndexError:
-        await message.answer('No such product!')
-    await state.update_data(id=list[i][0])
-    await message.answer_photo(photo=list[i][4], caption=text, reply_markup=edit_markup)
+        await message.answer('No such product!') # fixme wtf? неправильные индексы
+    await state.update_data(id=list[0][0])
+    await message.answer_photo(photo=list[0][4], caption=text, reply_markup=edit_markup)
     await Edit.next()
 
 
@@ -74,6 +76,7 @@ async def edit_photo(message: Message, state: FSMContext):
     print( ' Ok')
     tables.cur.execute(f'UPDATE products SET photo="{data["photo"]}" WHERE item_id="{data["id"]}"')
     tables.conn.commit()
+    await message.delete()
     #await message.answer('Success!')
     #await state.finish()
     await stock.get_list(message)
@@ -85,7 +88,9 @@ async def edit_price(message: Message, state: FSMContext):
     if data['action'] == 'price':
         if message.text.isdigit():
             tables.cur.execute(f'UPDATE products SET price="{message.text}" WHERE item_id="{data["id"]}"')
+            await message.delete()
             #await message.answer('Success!')#todo сделать alert
+            await call.answer(text='Success!', show_alert=True)
             await stock.get_list(message)
         else:
             await message.reply('Must be an integer')
@@ -101,6 +106,7 @@ async def edit_text(message: Message, state: FSMContext):
     elif data['action'] == 'description':
         tables.cur.execute(f'UPDATE products SET product_description="{message.text}" WHERE item_id="{data["id"]}"')
     tables.conn.commit()
+    await message.delete()
     await stock.get_list(message)
     #await state.finish()
 

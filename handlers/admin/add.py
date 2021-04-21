@@ -1,6 +1,8 @@
 from aiogram import types
 from aiogram.dispatcher import FSMContext
+from aiogram.dispatcher.webhook import DeleteMessage
 from aiogram.types import CallbackQuery, Message
+
 
 from data import tables
 from handlers.admin import stock
@@ -22,6 +24,8 @@ async def add_product(call: CallbackQuery):
 async def product_name(message: Message):
     state = dp.get_current().current_state()
     await state.update_data(name=message.text)
+    await message.delete()
+    #message = message.message_id-1
     await message.answer(text='Send me the product description')
     await Stock.next()
 
@@ -53,12 +57,12 @@ async def product_photo(message: Message, state: FSMContext):
     tables.cur.execute(f'SELECT * FROM products')
     list = tables.cur.fetchall()
     text = '<b>#{id} {name}</b>\n{description}\n Price: <b>{price}</b>'.format(
-        id=len(list)+1,
+        id=len(list) + 1,
         name=data['name'],
         description=data["description"],
         price=data['price']
     )
-    await message.answer_photo(photo=data['photo'], caption=text,  reply_markup=submit_cancel)
+    await message.answer_photo(photo=data['photo'], caption=text, reply_markup=submit_cancel)
     await Stock.next()
 
 
@@ -70,20 +74,24 @@ async def submit_product(call: CallbackQuery, state: FSMContext):
     list = tables.cur.fetchall()
     last = max(list)
     print('test ', last[0])
-    item_id = last[0]+1
+    item_id = last[0] + 1
 
-    print('max=', item_id )
+    print('max=', item_id)
     tables.cur.execute(
-        f'INSERT INTO products VALUES({item_id},(?),(?),"{data["price"]}","{data["photo"]}")', (data["name"], data["description"],))
+        f'INSERT INTO products VALUES({item_id},(?),(?),"{data["price"]}","{data["photo"]}")',
+        (data["name"], data["description"],))
     tables.conn.commit()
-    #await call.message.answer(text='The product list has been updated') # todo alert
+    # await call.message.answer(text='The product list has been updated') # todo alert
     await state.reset_state()
+    await call.message.delete()
+
     await stock.get_list(call.message)
 
 
-
-@dp.callback_query_handler(submit_callback.filter(decision=['cancel']),state=Stock.Q5)
+@dp.callback_query_handler(submit_callback.filter(decision=['cancel']), state=Stock.Q5)
 async def reset_product(call: CallbackQuery, state: FSMContext):
     await call.answer(cache_time=2)
     await state.reset_state()
+    # todo alert
+    await call.message.delete()
     await stock.get_list(call.message)

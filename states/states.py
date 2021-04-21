@@ -5,6 +5,7 @@ class Comment(StatesGroup):
     pages: State = State()
     vote: State = State()
 
+
 class Stock(StatesGroup):
     stock: State = State()
     Q1: State = State()
@@ -14,6 +15,7 @@ class Stock(StatesGroup):
     Q5: State = State()
     buy: State = State()
 
+
 class Edit(StatesGroup):
     Q1: State = State()
     Q2: State = State()
@@ -21,6 +23,10 @@ class Edit(StatesGroup):
     Q4: State = State()
     Q5: State = State()
 
+
 class Delete(StatesGroup):
-    Q1: State=State()
-    #Q2: State=State()
+    Q1: State = State()
+
+
+class Channel(StatesGroup):
+    Q1: State = State()
