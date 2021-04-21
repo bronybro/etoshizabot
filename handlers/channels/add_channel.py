@@ -6,7 +6,8 @@ from aiogram.types import Chat
 import logging
 from loader import dp
 from states.states import Channel
-
+from loader import bot
+from data import config
 
 @dp.message_handler(Command('addch'), state='*')
 async def await_channel(message:Message):
@@ -18,11 +19,16 @@ async def await_channel(message:Message):
 
 @dp.message_handler(state=Channel.Q1)
 async def add_channel(message:Message, state: FSMContext):
+    test = open(".env", "r")
+    print(test.readlines())
     with open(".env", "a") as f:
-        f.write(f"CHANNEL_ID={message.text}\n"
+        
+        
+        f.write(f"CHANNEL_ID={message.text}\n") # todo проверка на указан ли канал в config
+
     #TODO 1. send message to admin
     #TODO 2. send message to channel in new def
-    #await Chat.answer(username=message.text,text='OK!')
+    await bot.send_message(config.CHANNEL_ID,text='OK!')
 
 
 
