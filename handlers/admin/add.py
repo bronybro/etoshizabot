@@ -2,14 +2,11 @@ from aiogram import types
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.webhook import DeleteMessage
 from aiogram.types import CallbackQuery, Message
-
-
 from data import tables
 from handlers.admin import stock
 from keyboards.inline.submit_keys import submit_cancel
 from keyboards.inline.callback_datas import submit_callback, stock_callback
-
-from loader import dp
+from loader import dp,bot
 from states.states import Stock
 
 
@@ -56,7 +53,7 @@ async def product_photo(message: Message, state: FSMContext):
     data = await state.get_data()
     tables.cur.execute(f'SELECT * FROM products')
     list = tables.cur.fetchall()
-    text = '<b>#{id} {name}</b>\n{description}\n Price: <b>{price}</b>'.format(
+    text = '<b>#{id} {name}</b>\n{description}\n Price: <b>{price}</b>'.format( # FIXMI DRY next func()
         id=len(list) + 1,
         name=data['name'],
         description=data["description"],
@@ -72,26 +69,34 @@ async def submit_product(call: CallbackQuery, state: FSMContext):
     data = await state.get_data()
     tables.cur.execute(f'SELECT * FROM products')
     list = tables.cur.fetchall()
-    last = max(list)
-    print('test ', last[0])
-    item_id = last[0] + 1
+    try:
+        last = max(list)
+        print('test ', last[0])
+        item_id = last[0] + 1
+    except ValueError:
+        item_id = 1
 
     print('max=', item_id)
     tables.cur.execute(
         f'INSERT INTO products VALUES({item_id},(?),(?),"{data["price"]}","{data["photo"]}")',
         (data["name"], data["description"],))
     tables.conn.commit()
-    # await call.message.answer(text='The product list has been updated') # todo alert
     await state.reset_state()
     await call.message.delete()
-
-    await stock.get_list(call.message)
+    text = '<b>#{id} {name}</b>\n{description}\n Price: <b>{price}</b>'.format(
+        id=len(list) + 1,
+        name=data['name'],
+        description=data["description"],
+        price=data['price']
+    )
+    # TODO добаввить выбор постить или нет в бд сохранять ссылки на посты
+    await bot.send_message(chat_id='@etoshizashop', text=text) 
+    await stock.get_list(call.message)         
 
 
 @dp.callback_query_handler(submit_callback.filter(decision=['cancel']), state=Stock.Q5)
 async def reset_product(call: CallbackQuery, state: FSMContext):
     await call.answer(cache_time=2)
     await state.reset_state()
-    # todo alert
     await call.message.delete()
     await stock.get_list(call.message)

@@ -12,7 +12,7 @@ IP = env.str("ip")  # айпи адреса хоста
 URL_TWITTER = env.str("URL_TWITTER")
 URL_TELEGRAM = env.str("URL_TELEGRAM")
 #LIST_EMOJI = env.int("list_emoji_length")
-CHANNEL_ID = env.str("CHANNEL_ID")
+
 
 def config_text(filename: str = "help"):
     try:

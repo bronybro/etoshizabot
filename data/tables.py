@@ -18,7 +18,7 @@ cur.execute(
     'CREATE TABLE IF NOT EXISTS users(\
 user_id INTEGER UNIQUE,\
 user_vote INTEGER,\
-user_comment TEXT)'
+user_comment TEXT)' 
 )
 cur.execute(
     'CREATE TABLE IF NOT EXISTS products(\
@@ -27,6 +27,10 @@ product_name TEXT,\
 product_description TEXT,\
 price REAL,\
 photo INTEGER)'
+)
+cur.execute(
+    'CREATE TABLE IF NOT EXISTS channels(\
+channel_id TEXT UNIQUE)'
 )
 
 
