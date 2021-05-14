@@ -19,16 +19,14 @@ async def await_channel(message:Message):
 
 @dp.message_handler(state=Channel.Q1)
 async def add_channel(message:Message, state: FSMContext):
-    test = open(".env", "r")
-    print(test.readlines())
+    read_f = open(".env", "r")
+    print(read_f.readlines()[5])
     with open(".env", "a") as f:
-        
-        
-        f.write(f"CHANNEL_ID={message.text}\n") # todo проверка на указан ли канал в config
-
-    #TODO 1. send message to admin
-    #TODO 2. send message to channel in new def
-    await bot.send_message(config.CHANNEL_ID,text='OK!')
+        if message.text not in read_f:
+            f.write(f"CHANNEL_ID={message.text}\n")
+            await bot.send_message(config.CHANNEL_ID,text='Bot added!')
+        else:
+            await bot.send_message(config.CHANNEL_ID,text='Bot already added!')
 
 
 
